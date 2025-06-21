@@ -278,6 +278,49 @@ Route::middleware('session.auth')->group(function () {
     })->name('questions.show');
 });
 
+// Teacher Routes
+Route::middleware(['session.auth', 'teacher'])->prefix('teacher')->name('teacher.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Teacher\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\Teacher\DashboardController::class, 'index'])->name('dashboard.index');
+    Route::get('/subjects', [App\Http\Controllers\Teacher\DashboardController::class, 'subjects'])->name('subjects');
+    Route::get('/students', [App\Http\Controllers\Teacher\DashboardController::class, 'students'])->name('students');
+    Route::get('/content', [App\Http\Controllers\Teacher\DashboardController::class, 'content'])->name('content');
+    Route::get('/analytics', [App\Http\Controllers\Teacher\DashboardController::class, 'analytics'])->name('analytics');
+
+    // Phase 2: Hub pages
+    Route::get('/create', [App\Http\Controllers\Teacher\DashboardController::class, 'createHub'])->name('create.hub');
+    Route::get('/students/manage', [App\Http\Controllers\Teacher\DashboardController::class, 'studentsHub'])->name('students.hub');
+
+    // Notes CRUD routes
+    Route::get('/notes/create', [App\Http\Controllers\Teacher\DashboardController::class, 'createNote'])->name('notes.create');
+    Route::post('/notes', [App\Http\Controllers\Teacher\DashboardController::class, 'storeNote'])->name('notes.store');
+    Route::get('/notes/{note}', [App\Http\Controllers\Teacher\DashboardController::class, 'showNote'])->name('notes.show');
+    Route::get('/notes/{note}/edit', [App\Http\Controllers\Teacher\DashboardController::class, 'editNote'])->name('notes.edit');
+    Route::put('/notes/{note}', [App\Http\Controllers\Teacher\DashboardController::class, 'updateNote'])->name('notes.update');
+    Route::delete('/notes/{note}', [App\Http\Controllers\Teacher\DashboardController::class, 'deleteNote'])->name('notes.delete');
+
+    // Questions CRUD routes
+    Route::get('/questions/create', [App\Http\Controllers\Teacher\DashboardController::class, 'createQuestion'])->name('questions.create');
+    Route::post('/questions', [App\Http\Controllers\Teacher\DashboardController::class, 'storeQuestion'])->name('questions.store');
+    Route::get('/questions/{question}/edit', [App\Http\Controllers\Teacher\DashboardController::class, 'editQuestion'])->name('questions.edit');
+    Route::put('/questions/{question}', [App\Http\Controllers\Teacher\DashboardController::class, 'updateQuestion'])->name('questions.update');
+    Route::delete('/questions/{question}', [App\Http\Controllers\Teacher\DashboardController::class, 'deleteQuestion'])->name('questions.delete');
+
+    // Student management routes
+    Route::post('/students/{student}/assign', [App\Http\Controllers\Teacher\DashboardController::class, 'assignStudent'])->name('students.assign');
+    Route::delete('/students/{student}/remove', [App\Http\Controllers\Teacher\DashboardController::class, 'removeStudent'])->name('students.remove');
+
+    // Bulk operations
+    Route::post('/notes/bulk-delete', [App\Http\Controllers\Teacher\DashboardController::class, 'bulkDeleteNotes'])->name('notes.bulk-delete');
+    Route::post('/questions/bulk-delete', [App\Http\Controllers\Teacher\DashboardController::class, 'bulkDeleteQuestions'])->name('questions.bulk-delete');
+
+    // Notification routes
+    Route::get('/notifications', [App\Http\Controllers\Teacher\DashboardController::class, 'getNotifications'])->name('notifications.get');
+    Route::post('/notifications/{notification}/read', [App\Http\Controllers\Teacher\DashboardController::class, 'markNotificationRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [App\Http\Controllers\Teacher\DashboardController::class, 'markAllNotificationsRead'])->name('notifications.mark-all-read');
+    Route::delete('/notifications/{notification}', [App\Http\Controllers\Teacher\DashboardController::class, 'deleteNotification'])->name('notifications.delete');
+});
+
 // Admin Routes
 Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
     // Admin Dashboard

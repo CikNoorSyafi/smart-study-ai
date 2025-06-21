@@ -1,0 +1,11 @@
+# Check PHP version (should be 8.2+)
+php -v
+
+# Check Node.js version (should be 16+)
+node -v
+
+# Check NPM version
+npm -v
+
+# Check Composer version
+composer -v

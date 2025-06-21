@@ -43,7 +43,15 @@ class AuthController extends Controller
                 'email' => $user->email
             ]);
 
-            return redirect()->intended('/dashboard')->with('success', 'Welcome back, ' . $user->name . '!');
+            // Redirect based on user role
+            $redirectRoute = match($user->role) {
+                'admin' => '/admin',
+                'teacher' => '/teacher',
+                'parent' => '/parent',
+                default => '/dashboard'
+            };
+
+            return redirect()->intended($redirectRoute)->with('success', 'Welcome back, ' . $user->name . '!');
         }
 
         throw ValidationException::withMessages([
@@ -94,7 +102,15 @@ class AuthController extends Controller
             'email' => $user->email
         ]);
 
-        return redirect('/dashboard')->with('success', 'Account created successfully! Welcome to QuestionCraft, ' . $user->name . '.');
+        // Redirect based on user role
+        $redirectRoute = match($user->role) {
+            'admin' => '/admin',
+            'teacher' => '/teacher',
+            'parent' => '/parent',
+            default => '/dashboard'
+        };
+
+        return redirect($redirectRoute)->with('success', 'Account created successfully! Welcome to QuestionCraft, ' . $user->name . '.');
     }
 
     /**
