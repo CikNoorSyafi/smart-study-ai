@@ -298,6 +298,12 @@ Route::middleware(['session.auth', 'teacher'])->prefix('teacher')->name('teacher
     Route::get('/create', [App\Http\Controllers\Teacher\DashboardController::class, 'createHub'])->name('create.hub');
     Route::get('/students/manage', [App\Http\Controllers\Teacher\DashboardController::class, 'studentsHub'])->name('students.hub');
 
+    // Subject detail pages
+    Route::get('/subjects/{subject}', [App\Http\Controllers\Teacher\DashboardController::class, 'subjectDetail'])->name('subjects.detail');
+    Route::get('/subjects/{subject}/students', [App\Http\Controllers\Teacher\DashboardController::class, 'subjectStudents'])->name('subjects.students');
+    Route::get('/subjects/{subject}/content', [App\Http\Controllers\Teacher\DashboardController::class, 'subjectContent'])->name('subjects.content');
+    Route::get('/subjects/{subject}/analytics', [App\Http\Controllers\Teacher\DashboardController::class, 'subjectAnalytics'])->name('subjects.analytics');
+
     // Notes CRUD routes
     Route::get('/notes/create', [App\Http\Controllers\Teacher\DashboardController::class, 'createNote'])->name('notes.create');
     Route::post('/notes', [App\Http\Controllers\Teacher\DashboardController::class, 'storeNote'])->name('notes.store');

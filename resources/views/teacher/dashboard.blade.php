@@ -132,7 +132,7 @@
                 @if($teacherSubjects->count() > 0)
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @foreach($teacherSubjects->take(4) as $subject)
-                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <a href="{{ route('teacher.subjects.detail', $subject) }}" class="block border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-primary transition-all cursor-pointer">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <h4 class="font-medium text-gray-900">{{ $subject->name }}</h4>
@@ -143,9 +143,12 @@
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         Active
                                     </span>
+                                    <div class="mt-2">
+                                        <i class="fas fa-arrow-right text-gray-400 text-sm"></i>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                         @endforeach
                     </div>
                     @if($teacherSubjects->count() > 4)

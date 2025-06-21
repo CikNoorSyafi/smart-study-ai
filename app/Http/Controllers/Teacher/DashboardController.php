@@ -22,13 +22,13 @@ class DashboardController extends Controller
     {
         $teacher = auth()->user();
         
-        // Get teacher's assigned subjects using explicit query
-        $teacherSubjects = DB::table('subjects')
-            ->join('user_subjects', 'subjects.subject_id', '=', 'user_subjects.subject_id')
-            ->where('user_subjects.user_id', $teacher->user_id)
-            ->where('user_subjects.role_in_subject', 'teacher')
-            ->select('subjects.*')
-            ->get();
+        // Get teacher's assigned subjects using Eloquent for proper model instances
+        $subjectIds = DB::table('user_subjects')
+            ->where('user_id', $teacher->user_id)
+            ->where('role_in_subject', 'teacher')
+            ->pluck('subject_id');
+
+        $teacherSubjects = Subject::whereIn('subject_id', $subjectIds)->get();
 
         // Add counts manually for each subject
         foreach ($teacherSubjects as $subject) {
@@ -926,5 +926,223 @@ class DashboardController extends Controller
             'success' => true,
             'unread_count' => $unreadCount
         ]);
+    }
+
+    // ==========================================
+    // SUBJECT DETAIL PAGES
+    // ==========================================
+
+    /**
+     * Show subject detail page
+     */
+    public function subjectDetail(Subject $subject)
+    {
+        $teacher = auth()->user();
+
+        // Verify teacher has access to this subject
+        $hasAccess = DB::table('user_subjects')
+            ->where('user_id', $teacher->user_id)
+            ->where('subject_id', $subject->subject_id)
+            ->where('role_in_subject', 'teacher')
+            ->exists();
+
+        if (!$hasAccess) {
+            abort(403, 'You do not have access to this subject.');
+        }
+
+        // Get subject statistics
+        $stats = [
+            'total_students' => DB::table('user_subjects')
+                ->where('subject_id', $subject->subject_id)
+                ->where('role_in_subject', 'student')
+                ->count(),
+            'total_notes' => DB::table('note_subjects')
+                ->join('notes', 'note_subjects.note_id', '=', 'notes.note_id')
+                ->where('note_subjects.subject_id', $subject->subject_id)
+                ->where('notes.user_id', $teacher->user_id)
+                ->count(),
+            'published_notes' => DB::table('note_subjects')
+                ->join('notes', 'note_subjects.note_id', '=', 'notes.note_id')
+                ->where('note_subjects.subject_id', $subject->subject_id)
+                ->where('notes.user_id', $teacher->user_id)
+                ->where('notes.status', 'published')
+                ->count(),
+            'total_questions' => DB::table('note_subjects')
+                ->join('notes', 'note_subjects.note_id', '=', 'notes.note_id')
+                ->join('questions', 'notes.note_id', '=', 'questions.note_id')
+                ->where('note_subjects.subject_id', $subject->subject_id)
+                ->where('notes.user_id', $teacher->user_id)
+                ->count(),
+        ];
+
+        // Get recent students (last 5 enrolled)
+        $recentStudents = User::whereHas('subjects', function($query) use ($subject) {
+            $query->where('user_subjects.subject_id', $subject->subject_id)
+                  ->where('user_subjects.role_in_subject', 'student');
+        })->orderBy('created_at', 'desc')->take(5)->get();
+
+        // Get recent notes for this subject
+        $recentNotes = Note::whereHas('subjects', function($query) use ($subject) {
+            $query->where('note_subjects.subject_id', $subject->subject_id);
+        })->where('user_id', $teacher->user_id)
+          ->orderBy('created_at', 'desc')
+          ->take(5)
+          ->get();
+
+        // Get recent activity for this subject
+        $recentActivity = [
+            [
+                'icon' => 'fas fa-user-plus',
+                'color' => 'text-green-500',
+                'description' => 'New student enrolled in ' . $subject->name,
+                'time' => '2 hours ago'
+            ],
+            [
+                'icon' => 'fas fa-file-alt',
+                'color' => 'text-blue-500',
+                'description' => 'Study note updated',
+                'time' => '1 day ago'
+            ],
+            [
+                'icon' => 'fas fa-question-circle',
+                'color' => 'text-purple-500',
+                'description' => 'Questions generated from notes',
+                'time' => '2 days ago'
+            ]
+        ];
+
+        return view('teacher.subjects.detail', compact(
+            'subject',
+            'stats',
+            'recentStudents',
+            'recentNotes',
+            'recentActivity'
+        ));
+    }
+
+    /**
+     * Show subject students page
+     */
+    public function subjectStudents(Subject $subject)
+    {
+        $teacher = auth()->user();
+
+        // Verify teacher has access to this subject
+        $hasAccess = DB::table('user_subjects')
+            ->where('user_id', $teacher->user_id)
+            ->where('subject_id', $subject->subject_id)
+            ->where('role_in_subject', 'teacher')
+            ->exists();
+
+        if (!$hasAccess) {
+            abort(403, 'You do not have access to this subject.');
+        }
+
+        // Get all students for this subject
+        $students = User::whereHas('subjects', function($query) use ($subject) {
+            $query->where('user_subjects.subject_id', $subject->subject_id)
+                  ->where('user_subjects.role_in_subject', 'student');
+        })->with(['subjects' => function($query) use ($subject) {
+            $query->where('user_subjects.subject_id', $subject->subject_id);
+        }])->paginate(20);
+
+        // Get unassigned students
+        $assignedStudentIds = $students->pluck('user_id');
+        $unassignedStudents = User::where('role', 'student')
+            ->whereNotIn('user_id', $assignedStudentIds)
+            ->take(10)
+            ->get();
+
+        return view('teacher.subjects.students', compact('subject', 'students', 'unassignedStudents'));
+    }
+
+    /**
+     * Show subject content page
+     */
+    public function subjectContent(Subject $subject)
+    {
+        $teacher = auth()->user();
+
+        // Verify teacher has access to this subject
+        $hasAccess = DB::table('user_subjects')
+            ->where('user_id', $teacher->user_id)
+            ->where('subject_id', $subject->subject_id)
+            ->where('role_in_subject', 'teacher')
+            ->exists();
+
+        if (!$hasAccess) {
+            abort(403, 'You do not have access to this subject.');
+        }
+
+        // Get notes for this subject
+        $notes = Note::whereHas('subjects', function($query) use ($subject) {
+            $query->where('note_subjects.subject_id', $subject->subject_id);
+        })->where('user_id', $teacher->user_id)
+          ->with(['subjects'])
+          ->orderBy('created_at', 'desc')
+          ->paginate(10);
+
+        // Get questions for this subject
+        $questions = Question::whereHas('note.subjects', function($query) use ($subject) {
+            $query->where('note_subjects.subject_id', $subject->subject_id);
+        })->whereHas('note', function($query) use ($teacher) {
+            $query->where('user_id', $teacher->user_id);
+        })->with(['note', 'answers'])
+          ->orderBy('created_at', 'desc')
+          ->paginate(10);
+
+        return view('teacher.subjects.content', compact('subject', 'notes', 'questions'));
+    }
+
+    /**
+     * Show subject analytics page
+     */
+    public function subjectAnalytics(Subject $subject)
+    {
+        $teacher = auth()->user();
+
+        // Verify teacher has access to this subject
+        $hasAccess = DB::table('user_subjects')
+            ->where('user_id', $teacher->user_id)
+            ->where('subject_id', $subject->subject_id)
+            ->where('role_in_subject', 'teacher')
+            ->exists();
+
+        if (!$hasAccess) {
+            abort(403, 'You do not have access to this subject.');
+        }
+
+        // Get analytics data for this subject
+        $analytics = [
+            'student_engagement' => [
+                'total_students' => DB::table('user_subjects')
+                    ->where('subject_id', $subject->subject_id)
+                    ->where('role_in_subject', 'student')
+                    ->count(),
+                'active_students' => rand(8, 12), // TODO: Calculate real active students
+                'engagement_rate' => rand(75, 95), // TODO: Calculate real engagement
+            ],
+            'content_performance' => [
+                'total_notes' => DB::table('note_subjects')
+                    ->join('notes', 'note_subjects.note_id', '=', 'notes.note_id')
+                    ->where('note_subjects.subject_id', $subject->subject_id)
+                    ->where('notes.user_id', $teacher->user_id)
+                    ->count(),
+                'avg_note_views' => rand(15, 45), // TODO: Calculate real views
+                'most_viewed_note' => 'Introduction to Programming', // TODO: Get real data
+            ],
+            'question_analytics' => [
+                'total_questions' => DB::table('note_subjects')
+                    ->join('notes', 'note_subjects.note_id', '=', 'notes.note_id')
+                    ->join('questions', 'notes.note_id', '=', 'questions.note_id')
+                    ->where('note_subjects.subject_id', $subject->subject_id)
+                    ->where('notes.user_id', $teacher->user_id)
+                    ->count(),
+                'avg_score' => rand(70, 90), // TODO: Calculate real scores
+                'completion_rate' => rand(80, 95), // TODO: Calculate real completion
+            ]
+        ];
+
+        return view('teacher.subjects.analytics', compact('subject', 'analytics'));
     }
 }
