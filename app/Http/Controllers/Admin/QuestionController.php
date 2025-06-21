@@ -19,6 +19,12 @@ class QuestionController extends Controller
     {
         $query = Question::with(['note', 'user', 'answers']);
 
+        // Filter by status (default to approved only)
+        $status = $request->get('status', 'approved');
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
@@ -50,8 +56,9 @@ class QuestionController extends Controller
         // For filters
         $notes = Note::orderBy('title')->get();
         $users = User::orderBy('name')->get();
+        $statuses = ['approved', 'pending', 'all'];
 
-        return view('admin.questions.index', compact('questions', 'notes', 'users'));
+        return view('admin.questions.index', compact('questions', 'notes', 'users', 'statuses', 'status'));
     }
 
     /**

@@ -23,7 +23,7 @@
                            class="inline-flex items-center bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium">
                             <i class="fas fa-chart-line mr-2"></i>Reports
                         </a>
-                        <a href="{{ route('admin.export-data') }}"
+                        <a href="{{ route('admin.export') }}"
                            class="inline-flex items-center bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium">
                             <i class="fas fa-download mr-2"></i>Export
                         </a>
@@ -358,7 +358,7 @@
                                 <i class="fas fa-heartbeat mr-3 text-indigo-600"></i>System Health
                                 <span class="ml-auto">→</span>
                             </a>
-                            <a href="{{ route('admin.export-data') }}"
+                            <a href="{{ route('admin.export') }}"
                                class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-xl transition-all duration-200">
                                 <i class="fas fa-download mr-3 text-indigo-600"></i>Export Data
                                 <span class="ml-auto">→</span>
@@ -461,7 +461,7 @@
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h4 class="text-lg font-semibold text-gray-900 mb-1">QuestionCraft Admin Dashboard</h4>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-1">Smart Study Admin Dashboard</h4>
                     <p class="text-sm text-gray-600">
                         Complete administrative control panel with real-time monitoring and management capabilities
                     </p>

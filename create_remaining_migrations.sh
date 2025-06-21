@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to create all remaining migrations for the QuestionCraft schema
+# Script to create all remaining migrations for the Smart Study schema
 
 echo "Creating remaining migrations..."
 

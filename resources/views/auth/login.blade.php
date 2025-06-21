@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Login - QuestionCraft')
+@section('title', 'Login - Smart Study')
 
 @push('styles')
 <style>
@@ -16,7 +16,7 @@
             <!-- Header -->
             <div class="text-center">
                 <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">Welcome back</h2>
-                <p class="text-slate-600">Sign in to your QuestionCraft account</p>
+                <p class="text-slate-600">Sign in to your Smart Study account</p>
             </div>
 
             <!-- Demo Credentials -->
@@ -32,7 +32,7 @@
                 <div class="text-sm text-blue-700 space-y-2">
                     <div class="flex items-center">
                         <span class="font-medium text-blue-800 w-16">Email:</span>
-                        <code class="bg-white/60 px-2 py-1 rounded text-blue-900 font-mono text-xs">demo@questioncraft.com</code>
+                        <code class="bg-white/60 px-2 py-1 rounded text-blue-900 font-mono text-xs">demo@smartstudy.com</code>
                     </div>
                     <div class="flex items-center">
                         <span class="font-medium text-blue-800 w-16">Password:</span>

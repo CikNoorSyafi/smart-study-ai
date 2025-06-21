@@ -46,6 +46,9 @@ class Subject extends Model
         'subject_id',
         'name',
         'description',
+        'form_level',
+        'category',
+        'subject_code',
     ];
 
     /**

@@ -21,7 +21,7 @@ class AuthenticationTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewIs('auth.login');
-        $response->assertSee('Sign in to your QuestionCraft account');
+        $response->assertSee('Sign in to your Smart Study account');
     }
 
     /**

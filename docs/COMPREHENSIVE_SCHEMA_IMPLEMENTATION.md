@@ -295,7 +295,7 @@ php artisan migrate:status
 php artisan test
 
 # Run specific test file
-php artisan test tests/Feature/QuestionCraftSchemaTest.php
+php artisan test tests/Feature/SmartStudySchemaTest.php
 
 # Run database verification
 php tests/database_schema_verification.php
@@ -317,7 +317,7 @@ Subject::withCount('notes', 'users')->get()
 
 ## **Conclusion**
 
-The QuestionCraft database schema has been successfully implemented with 8 core tables providing a solid foundation for an educational platform. The system includes:
+The Smart Study database schema has been successfully implemented with 8 core tables providing a solid foundation for an educational platform. The system includes:
 
 - ✅ **Complete user management** with roles and profiles
 - ✅ **Subject categorization** system

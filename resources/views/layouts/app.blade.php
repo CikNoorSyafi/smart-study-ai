@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>@yield('title', 'QuestionCraft - Transform Learning into Questions')</title>
+        <title>@yield('title', 'Smart Study - Transform Learning into Questions')</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -37,7 +37,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                 </div>
-                                <span class="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-300">QuestionCraft</span>
+                                <span class="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-300">Smart Study</span>
                             </a>
                         </div>
 
@@ -113,18 +113,49 @@
                                                 </svg>
                                                 Profile Settings
                                             </a>
+                                            @if(session('user.role') === 'student')
+                                            <a href="{{ route('ai-chat.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200 {{ request()->routeIs('ai-chat.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                                </svg>
+                                                AI Study Assistant
+                                            </a>
+                                            <a href="#" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200">
+                                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                                </svg>
+                                                Practice Quizzes
+                                            </a>
+                                            <a href="#" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200">
+                                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.168 18.477 18.582 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                                </svg>
+                                                My Notes
+                                            </a>
+                                            @else
                                             <a href="{{ route('questions.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200 {{ request()->routeIs('questions.*') ? 'bg-blue-50 text-blue-600' : '' }}">
                                                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                                                 </svg>
                                                 My Questions
                                             </a>
+                                            @endif
+                                            @if(session('user.role') === 'admin' || session('user.role') === 'teacher')
+                                            <a href="{{ route('pdf-upload.index') }}" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200 {{ request()->routeIs('pdf-upload.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                                </svg>
+                                                PDF Upload
+                                            </a>
+                                            @endif
+                                            @if(session('user.role') === 'admin')
                                             <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200 {{ request()->routeIs('admin.*') ? 'bg-blue-50 text-blue-600' : '' }}">
                                                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                                 </svg>
                                                 Admin Panel
                                             </a>
+                                            @endif
                                             <a href="#" class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200">
                                                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -221,18 +252,49 @@
                                         </svg>
                                         Profile Settings
                                     </a>
+                                    @if(session('user.role') === 'student')
+                                    <a href="{{ route('ai-chat.index') }}" class="flex items-center px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-all duration-200 {{ request()->routeIs('ai-chat.*') ? 'text-blue-600 bg-blue-50 font-medium' : '' }}">
+                                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                        </svg>
+                                        AI Study Assistant
+                                    </a>
+                                    <a href="#" class="flex items-center px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-all duration-200">
+                                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                        </svg>
+                                        Practice Quizzes
+                                    </a>
+                                    <a href="#" class="flex items-center px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-all duration-200">
+                                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.168 18.477 18.582 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                        </svg>
+                                        My Notes
+                                    </a>
+                                    @else
                                     <a href="{{ route('questions.index') }}" class="flex items-center px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-all duration-200 {{ request()->routeIs('questions.*') ? 'text-blue-600 bg-blue-50 font-medium' : '' }}">
                                         <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                                         </svg>
                                         My Questions
                                     </a>
+                                    @endif
+                                    @if(session('user.role') === 'admin' || session('user.role') === 'teacher')
+                                    <a href="{{ route('pdf-upload.index') }}" class="flex items-center px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-all duration-200 {{ request()->routeIs('pdf-upload.*') ? 'text-blue-600 bg-blue-50 font-medium' : '' }}">
+                                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                        </svg>
+                                        PDF Upload
+                                    </a>
+                                    @endif
+                                    @if(session('user.role') === 'admin')
                                     <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-all duration-200 {{ request()->routeIs('admin.*') ? 'text-blue-600 bg-blue-50 font-medium' : '' }}">
                                         <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                         </svg>
                                         Admin Panel
                                     </a>
+                                    @endif
                                     <a href="#" class="flex items-center px-4 py-3 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-all duration-200">
                                         <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
@@ -313,7 +375,7 @@
                     <div class="grid md:grid-cols-4 gap-8">
                         <!-- Company Info -->
                         <div>
-                            <h3 class="text-2xl font-bold mb-4">QuestionCraft</h3>
+                            <h3 class="text-2xl font-bold mb-4">Smart Study</h3>
                             <p class="text-gray-400 mb-4">
                                 Transform your learning materials into engaging questions with the power of AI.
                             </p>
@@ -373,7 +435,7 @@
 
                     <div class="border-t border-gray-800 mt-12 pt-8 text-center">
                         <p class="text-gray-400">
-                            © {{ date('Y') }} QuestionCraft. All rights reserved.
+                            © {{ date('Y') }} Smart Study. All rights reserved.
                         </p>
                     </div>
                 </div>

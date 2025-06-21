@@ -35,6 +35,8 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'role' => fake()->randomElement($roles),
             'is_active' => fake()->boolean(90), // 90% chance of being active
+            'google_id' => null, // Standard users don't have Google ID
+            'avatar' => null, // Standard users don't have Google avatar
             'remember_token' => Str::random(10),
         ];
     }

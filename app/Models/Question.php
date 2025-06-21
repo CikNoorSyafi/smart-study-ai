@@ -34,9 +34,16 @@ class Question extends Model
         'question_id',
         'note_id',
         'user_id',
+        'created_by',
         'question_text',
-        'generated_by',
+        'question_type',
+        'difficulty_level',
         'difficulty',
+        'generated_by',
+        'explanation',
+        'status',
+        'approved_at',
+        'approved_by',
     ];
 
     /**
@@ -142,5 +149,37 @@ class Question extends Model
     public function getCharacterCountAttribute()
     {
         return strlen($this->question_text);
+    }
+
+    /**
+     * Get the difficulty level (alias for difficulty).
+     */
+    public function getDifficultyLevelAttribute()
+    {
+        return $this->difficulty;
+    }
+
+    /**
+     * Set the difficulty level (alias for difficulty).
+     */
+    public function setDifficultyLevelAttribute($value)
+    {
+        $this->attributes['difficulty'] = $value;
+    }
+
+    /**
+     * Get the created by (alias for user_id).
+     */
+    public function getCreatedByAttribute()
+    {
+        return $this->user_id;
+    }
+
+    /**
+     * Set the created by (alias for user_id).
+     */
+    public function setCreatedByAttribute($value)
+    {
+        $this->attributes['user_id'] = $value;
     }
 }

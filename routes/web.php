@@ -8,6 +8,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
+
 // Admin Access Test Route
 Route::get('/admin-test', function () {
     return view('admin-access-test');
@@ -29,7 +31,7 @@ Route::get('/debug-auth', function () {
 
 // Quick Login Test Route
 Route::get('/quick-login', function () {
-    $credentials = ['email' => 'admin@questioncraft.com', 'password' => 'password'];
+    $credentials = ['email' => 'admin@smartstudy.com', 'password' => 'password'];
 
     if (Auth::attempt($credentials)) {
         $user = Auth::user();
@@ -58,43 +60,48 @@ Route::middleware('session.guest')->group(function () {
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
-// Google OAuth Test Route
-Route::get('/test-google-oauth', function () {
-    $config = [
-        'google_client_id' => env('GOOGLE_CLIENT_ID'),
-        'google_client_secret' => env('GOOGLE_CLIENT_SECRET') ? 'Set (hidden)' : 'Not set',
-        'google_redirect_uri' => env('GOOGLE_REDIRECT_URI'),
-        'socialite_installed' => class_exists('Laravel\Socialite\Facades\Socialite'),
-        'google_service_config' => config('services.google'),
-    ];
 
-    return response()->json([
-        'status' => 'Google OAuth Configuration Check',
-        'config' => $config,
-        'routes' => [
-            'auth_google' => route('auth.google'),
-            'auth_callback' => route('auth.google.callback'),
-        ],
-        'ready' => !empty($config['google_client_id']) && !empty(env('GOOGLE_CLIENT_SECRET')),
-    ], 200, [], JSON_PRETTY_PRINT);
-})->name('test.google.oauth');
 
-// Google Account Management (for authenticated users)
-Route::middleware('session.auth')->group(function () {
-    Route::get('/auth/google/link', [GoogleController::class, 'linkGoogleAccount'])->name('auth.google.link');
-    Route::post('/auth/google/unlink', [GoogleController::class, 'unlinkGoogleAccount'])->name('auth.google.unlink');
-});
+
+
 
 Route::middleware('session.auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout.get');
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        $user = auth()->user();
+        $recentNotes = [];
+
+        // Get recent notes for students
+        if ($user && $user->role === 'student') {
+            $recentNotes = App\Models\Note::where('user_id', $user->user_id)
+                                         ->orderBy('created_at', 'desc')
+                                         ->limit(5)
+                                         ->get();
+        }
+
+        return view('dashboard', compact('recentNotes'));
     })->name('dashboard');
 
     // Profile Settings Routes
     Route::get('/profile', function () {
         return view('profile.settings');
     })->name('profile.settings');
+
+    // AI Chat Routes (Students only)
+    Route::middleware(['session.auth'])->group(function () {
+        Route::get('/ai-chat', [App\Http\Controllers\AiChatController::class, 'index'])->name('ai-chat.index');
+    });
+
+    // Parent Routes (Parents only)
+    Route::middleware(['parent'])->prefix('parent')->name('parent.')->group(function () {
+        Route::get('/children', [App\Http\Controllers\Parent\ParentController::class, 'children'])->name('children');
+        Route::get('/children/{child}/progress', [App\Http\Controllers\Parent\ParentController::class, 'childProgress'])->name('child.progress');
+        Route::get('/reports', [App\Http\Controllers\Parent\ParentController::class, 'reports'])->name('reports');
+        Route::get('/messages', [App\Http\Controllers\Parent\ParentController::class, 'messages'])->name('messages');
+        Route::get('/manage-children', [App\Http\Controllers\Parent\ParentController::class, 'manageChildren'])->name('manage-children');
+        Route::get('/detailed-reports', [App\Http\Controllers\Parent\ParentController::class, 'detailedReports'])->name('detailed-reports');
+    });
 
     Route::post('/profile', function () {
         // Validate the request
@@ -448,6 +455,7 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
 Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
     // Enhanced Dashboard functionality now integrated into main dashboard
     Route::get('/system-health', [App\Http\Controllers\Admin\DashboardController::class, 'systemHealth'])->name('system-health');
+    Route::get('/export', function() { return view('admin.export'); })->name('export');
     Route::get('/export-data', [App\Http\Controllers\Admin\DashboardController::class, 'exportData'])->name('export-data');
     Route::get('/reports', [App\Http\Controllers\Admin\DashboardController::class, 'reports'])->name('reports');
 
@@ -460,7 +468,7 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
         'edit' => 'users-crud.edit',
         'update' => 'users-crud.update',
         'destroy' => 'users-crud.destroy',
-    ]);
+    ])->parameters(['users-crud' => 'user']);
     Route::patch('users-crud/{user}/toggle-status', [App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users-crud.toggle-status');
 
     // Subject Management CRUD
@@ -476,7 +484,17 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
         'edit' => 'notes-crud.edit',
         'update' => 'notes-crud.update',
         'destroy' => 'notes-crud.destroy',
-    ]);
+    ])->parameters(['notes-crud' => 'note']);
+
+    // Question generation from notes
+    Route::post('notes-crud/{note}/generate-questions', [App\Http\Controllers\Admin\NoteController::class, 'generateQuestions'])
+         ->name('notes-crud.generate-questions');
+
+    // Question approval/rejection
+    Route::post('questions/approve', [App\Http\Controllers\Admin\NoteController::class, 'approveQuestions'])
+         ->name('questions.approve');
+    Route::post('questions/reject', [App\Http\Controllers\Admin\NoteController::class, 'rejectQuestions'])
+         ->name('questions.reject');
     Route::patch('notes-crud/bulk-update-status', [App\Http\Controllers\Admin\NoteController::class, 'bulkUpdateStatus'])->name('notes-crud.bulk-update-status');
 
     // Question Management CRUD
@@ -488,11 +506,39 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
     Route::patch('answers/bulk-update-correctness', [App\Http\Controllers\Admin\AnswerController::class, 'bulkUpdateCorrectness'])->name('answers.bulk-update-correctness');
 
     // User Profile Management CRUD
-    Route::resource('user-profiles', App\Http\Controllers\Admin\UserProfileController::class);
+    Route::resource('user-profiles', App\Http\Controllers\Admin\UserProfileController::class)->parameters(['user-profiles' => 'userProfile']);
     Route::get('user-profiles-statistics', [App\Http\Controllers\Admin\UserProfileController::class, 'statistics'])->name('user-profiles.statistics');
 
     // Feedback Management CRUD
-    Route::resource('feedback', App\Http\Controllers\Admin\FeedbackController::class);
+    Route::resource('feedback', App\Http\Controllers\Admin\FeedbackController::class)->parameters(['feedback' => 'feedback']);
     Route::get('feedback-statistics', [App\Http\Controllers\Admin\FeedbackController::class, 'statistics'])->name('feedback.statistics');
     Route::delete('feedback/bulk-delete', [App\Http\Controllers\Admin\FeedbackController::class, 'bulkDelete'])->name('feedback.bulk-delete');
+});
+// PDF Upload and Question Generation Routes (Admin & Teacher Only)
+Route::middleware(['teacher.admin'])->group(function () {
+    Route::get('/pdf-upload', [App\Http\Controllers\PdfUploadController::class, 'index'])->name('pdf-upload.index');
+    Route::post('/pdf-upload', [App\Http\Controllers\PdfUploadController::class, 'upload'])->name('pdf-upload.upload');
+    Route::get('/pdf-upload/list', [App\Http\Controllers\PdfUploadController::class, 'list'])->name('pdf-upload.list');
+    Route::get('/pdf-upload/{noteId}/result', [App\Http\Controllers\PdfUploadController::class, 'result'])->name('pdf-upload.result');
+    Route::get('/pdf-upload/{noteId}/download', [App\Http\Controllers\PdfUploadController::class, 'download'])->name('pdf-upload.download');
+    Route::delete('/pdf-upload/{noteId}', [App\Http\Controllers\PdfUploadController::class, 'delete'])->name('pdf-upload.delete');
+});
+
+// Question Generator API Routes (Admin & Teacher Only)
+Route::middleware(['teacher.admin'])->prefix('api')->group(function () {
+    Route::get('/question-generator', [App\Http\Controllers\QuestionGeneratorController::class, 'index'])->name('api.question-generator.index');
+    Route::post('/question-generator/generate', [App\Http\Controllers\QuestionGeneratorController::class, 'generate'])->name('api.question-generator.generate');
+    Route::post('/question-generator/compare', [App\Http\Controllers\QuestionGeneratorController::class, 'compare'])->name('api.question-generator.compare');
+    Route::post('/question-generator/test', [App\Http\Controllers\QuestionGeneratorController::class, 'test'])->name('api.question-generator.test');
+    Route::get('/question-generator/available', [App\Http\Controllers\QuestionGeneratorController::class, 'getAvailableGenerators'])->name('api.question-generator.available');
+});
+
+// AI Chat API Routes (Students only)
+Route::middleware(['session.auth'])->prefix('api/ai-chat')->group(function () {
+    Route::post('/summary', [App\Http\Controllers\AiChatController::class, 'getNoteSummary']);
+    Route::post('/answer', [App\Http\Controllers\AiChatController::class, 'answerQuestion']);
+    Route::get('/notes', [App\Http\Controllers\AiChatController::class, 'getUserNotes']);
+    Route::get('/availability', [App\Http\Controllers\AiChatController::class, 'checkAvailability']);
+    Route::get('/suggestions/{noteId}', [App\Http\Controllers\AiChatController::class, 'getSuggestedQuestions']);
+    Route::post('/save-history', [App\Http\Controllers\AiChatController::class, 'saveChatHistory']);
 });

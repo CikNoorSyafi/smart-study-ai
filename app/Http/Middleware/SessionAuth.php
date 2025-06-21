@@ -26,8 +26,10 @@ class SessionAuth
             $user = Auth::user();
             $request->session()->put('user', [
                 'id' => $user->id,
+                'user_id' => $user->user_id,
                 'name' => $user->name,
-                'email' => $user->email
+                'email' => $user->email,
+                'role' => $user->role
             ]);
         }
 

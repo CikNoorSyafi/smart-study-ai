@@ -1,8 +1,8 @@
-# QuestionCraft Documentation Index
+# Smart Study Documentation Index
 
 ## 📚 **Complete Documentation Library**
 
-This folder contains all the comprehensive documentation for the QuestionCraft educational platform development process.
+This folder contains all the comprehensive documentation for the Smart Study educational platform development process.
 
 ## 📋 **Documentation Categories**
 

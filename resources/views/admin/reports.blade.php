@@ -10,10 +10,10 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">System Reports</h1>
-                <p class="mt-1 text-sm text-gray-600">Comprehensive analytics and statistics for the QuestionCraft platform</p>
+                <p class="mt-1 text-sm text-gray-600">Comprehensive analytics and statistics for the Smart Study platform</p>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('admin.export-data') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <a href="{{ route('admin.export') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                     <i class="fas fa-download mr-2"></i>Export Data
                 </a>
                 <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
@@ -248,7 +248,7 @@
                 <h4 class="font-medium text-blue-900">Report Information</h4>
                 <p class="text-sm text-blue-700">
                     This report was generated on {{ now()->format('F j, Y \a\t g:i A') }}. 
-                    Data reflects the current state of the QuestionCraft platform.
+                    Data reflects the current state of the Smart Study platform.
                 </p>
             </div>
         </div>

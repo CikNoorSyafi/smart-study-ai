@@ -45,6 +45,8 @@ class Note extends Model
         'title',
         'content',
         'status',
+        'file_path',
+        'file_name',
     ];
 
     /**

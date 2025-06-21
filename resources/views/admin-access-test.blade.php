@@ -60,7 +60,7 @@
                 <div class="space-y-4">
                     <div class="bg-gray-50 p-4 rounded">
                         <h3 class="font-semibold mb-2">Admin Credentials:</h3>
-                        <p><strong>Email:</strong> admin@questioncraft.com</p>
+                        <p><strong>Email:</strong> admin@smartstudy.com</p>
                         <p><strong>Password:</strong> password</p>
                     </div>
                     

@@ -1,9 +1,9 @@
 <?php
 
 /**
- * QuestionCraft Comprehensive Functionality Demo
- * 
- * This script demonstrates all the implemented features of the QuestionCraft schema
+ * Smart Study Comprehensive Functionality Demo
+ *
+ * This script demonstrates all the implemented features of the Smart Study schema
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -20,11 +20,11 @@ use App\Models\Feedback;
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
-class QuestionCraftDemo
+class SmartStudyDemo
 {
     public function runDemo()
     {
-        echo "=== QuestionCraft Comprehensive Functionality Demo ===\n\n";
+        echo "=== Smart Study Comprehensive Functionality Demo ===\n\n";
         
         $this->demonstrateUserManagement();
         $this->demonstrateSubjectManagement();
@@ -302,14 +302,14 @@ class QuestionCraftDemo
 }
 
 // Run the comprehensive demo
-$demo = new QuestionCraftDemo();
+$demo = new SmartStudyDemo();
 $demo->runDemo();
 
 echo "=== Authentication Test Credentials ===\n";
 echo "Use these credentials to test the authentication system:\n";
-echo "Admin: admin@questioncraft.com / password123\n";
-echo "Demo: demo@questioncraft.com / demo123\n";
-echo "Test: test@questioncraft.com / test123\n";
+echo "Admin: admin@smartstudy.com / password123\n";
+echo "Demo: demo@smartstudy.com / demo123\n";
+echo "Test: test@smartstudy.com / test123\n";
 echo "\n=== Test URLs ===\n";
 echo "Login: http://127.0.0.1:8000/login\n";
 echo "Register: http://127.0.0.1:8000/register\n";

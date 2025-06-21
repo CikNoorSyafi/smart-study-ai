@@ -14,7 +14,7 @@ echo "=== Admin Login Test ===\n\n";
 
 // Test 1: Check if admin user exists
 echo "1. Checking admin users...\n";
-$adminUser = App\Models\User::where('email', 'admin@questioncraft.com')->first();
+$adminUser = App\Models\User::where('email', 'admin@smartstudy.com')->first();
 
 if ($adminUser) {
     echo "✅ Admin user found: {$adminUser->name} ({$adminUser->email})\n";
@@ -28,7 +28,7 @@ if ($adminUser) {
     $adminUser = App\Models\User::create([
         'user_id' => (string) Illuminate\Support\Str::uuid(),
         'name' => 'Admin User',
-        'email' => 'admin@questioncraft.com',
+        'email' => 'admin@smartstudy.com',
         'password' => bcrypt('password'),
         'role' => 'admin',
         'is_active' => true,
@@ -40,7 +40,7 @@ if ($adminUser) {
 // Test 2: Test login credentials
 echo "2. Testing login credentials...\n";
 $credentials = [
-    'email' => 'admin@questioncraft.com',
+    'email' => 'admin@smartstudy.com',
     'password' => 'password'
 ];
 
@@ -122,7 +122,7 @@ echo "Admin middleware: ✅ Created\n";
 echo "\n=== Login Instructions ===\n";
 echo "1. Go to: http://127.0.0.1:8000/login\n";
 echo "2. Use credentials:\n";
-echo "   Email: admin@questioncraft.com\n";
+echo "   Email: admin@smartstudy.com\n";
 echo "   Password: password\n";
 echo "3. After login, go to: http://127.0.0.1:8000/admin/dashboard\n";
 

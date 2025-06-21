@@ -178,9 +178,9 @@ class DatabaseAuthTest
     private function testSeededUsers()
     {
         $this->test('Seeded Users Exist', function() {
-            $adminUser = User::where('email', 'admin@questioncraft.com')->first();
-            $demoUser = User::where('email', 'demo@questioncraft.com')->first();
-            $testUser = User::where('email', 'test@questioncraft.com')->first();
+            $adminUser = User::where('email', 'admin@smartstudy.com')->first();
+            $demoUser = User::where('email', 'demo@smartstudy.com')->first();
+            $testUser = User::where('email', 'test@smartstudy.com')->first();
             
             return $adminUser && $demoUser && $testUser;
         });
@@ -226,9 +226,9 @@ $tester->runAllTests();
 
 echo "\n=== Manual Test Credentials ===\n";
 echo "Use these credentials for manual testing:\n";
-echo "Admin: admin@questioncraft.com / password123\n";
-echo "Demo: demo@questioncraft.com / demo123\n";
-echo "Test: test@questioncraft.com / test123\n";
+echo "Admin: admin@smartstudy.com / password123\n";
+echo "Demo: demo@smartstudy.com / demo123\n";
+echo "Test: test@smartstudy.com / test123\n";
 echo "Others: john@example.com / password123\n";
 echo "\n=== Test URLs ===\n";
 echo "Login: http://127.0.0.1:8000/login\n";

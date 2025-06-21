@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Sign Up - QuestionCraft')
+@section('title', 'Sign Up - Smart Study')
 
 @push('styles')
 <style>

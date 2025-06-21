@@ -1,7 +1,7 @@
 <?php
 
 /**
- * QuestionCraft Admin Pages Test Report
+ * Smart Study Admin Pages Test Report
  * 
  * This script tests all admin dashboard pages to ensure they're working correctly
  */
@@ -20,7 +20,7 @@ class AdminPagesTest
 
     public function runAllTests()
     {
-        echo "=== QuestionCraft Admin Pages Test Report ===\n\n";
+        echo "=== Smart Study Admin Pages Test Report ===\n\n";
         
         $this->testRouteExists();
         $this->testControllerMethods();

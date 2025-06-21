@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'QuestionCraft - Transform Learning into Questions')
+@section('title', 'Smart Study - Transform Learning into Questions')
 
 @section('content')
     <!-- Hero Section -->

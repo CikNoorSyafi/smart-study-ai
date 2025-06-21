@@ -1,7 +1,7 @@
 <?php
 
 /**
- * QuestionCraft Database Schema Verification Script
+ * Smart Study Database Schema Verification Script
  * 
  * This script verifies that the comprehensive database schema is properly implemented
  * and all relationships are working correctly.
@@ -30,7 +30,7 @@ class SchemaVerificationTest
 
     public function runAllTests()
     {
-        echo "=== QuestionCraft Database Schema Verification ===\n\n";
+        echo "=== Smart Study Database Schema Verification ===\n\n";
         
         $this->testDatabaseTables();
         $this->testUserModel();

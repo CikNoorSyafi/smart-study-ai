@@ -31,7 +31,8 @@ class GoogleController extends Controller
             
             // Check if user already exists with this Google ID
             $existingUser = User::where('google_id', $googleUser->getId())->first();
-            
+
+            // Check if user exists with this email
             if ($existingUser) {
                 // User exists with Google ID, log them in
                 Auth::login($existingUser);
@@ -60,6 +61,11 @@ class GoogleController extends Controller
             return $this->redirectAfterLogin($newUser);
             
         } catch (\Exception $e) {
+            if (str_contains($e->getMessage(), 'Connection refused') ||
+                str_contains($e->getMessage(), 'could not find driver') ||
+                str_contains($e->getMessage(), 'No connection could be made')) {
+                return redirect('/login')->with('error', 'Database connection failed. Please start MySQL service.');
+            }
             return redirect('/login')->with('error', 'Google authentication failed. Please try again.');
         }
     }

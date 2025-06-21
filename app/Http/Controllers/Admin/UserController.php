@@ -90,7 +90,7 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('admin.users-crud.index')
                         ->with('success', 'User created successfully.');
     }
 
@@ -166,7 +166,7 @@ class UserController extends Controller
             $user->subjects()->detach();
         }
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('admin.users-crud.index')
                         ->with('success', 'User updated successfully.');
     }
 
@@ -177,13 +177,13 @@ class UserController extends Controller
     {
         // Prevent deletion of the last admin
         if ($user->role === 'admin' && User::where('role', 'admin')->count() <= 1) {
-            return redirect()->route('admin.users.index')
+            return redirect()->route('admin.users-crud.index')
                             ->with('error', 'Cannot delete the last admin user.');
         }
 
         $user->delete();
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('admin.users-crud.index')
                         ->with('success', 'User deleted successfully.');
     }
 

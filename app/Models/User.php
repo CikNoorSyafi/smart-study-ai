@@ -17,28 +17,21 @@ class User extends Authenticatable
 
     /**
      * The primary key for the model.
-     * Using standard 'id' for Laravel authentication compatibility
+     * Using user_id UUID as primary key
      */
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'user_id';
 
     /**
      * Indicates if the model's ID is auto-incrementing.
      */
-    public $incrementing = true;
+    public $incrementing = false;
 
     /**
-     * The data type of the auto-incrementing ID.
+     * The data type of the primary key.
      */
-    protected $keyType = 'int';
+    protected $keyType = 'string';
 
-    /**
-     * Get the route key for the model.
-     * Use user_id for routes to maintain UUID-based routing
-     */
-    public function getRouteKeyName()
-    {
-        return 'user_id';
-    }
+
 
     /**
      * The attributes that are mass assignable.

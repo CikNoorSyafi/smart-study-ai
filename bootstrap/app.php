@@ -15,12 +15,17 @@ return Application::configure(basePath: dirname(__DIR__))
             'session.auth' => \App\Http\Middleware\SessionAuth::class,
             'session.guest' => \App\Http\Middleware\SessionGuest::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+<<<<<<< HEAD
             'teacher' => \App\Http\Middleware\TeacherMiddleware::class,
         ]);
 
         // Ensure CSRF protection is enabled for web routes
         $middleware->web(append: [
             \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+=======
+            'teacher.admin' => \App\Http\Middleware\TeacherAdminMiddleware::class,
+            'parent' => \App\Http\Middleware\ParentMiddleware::class,
+>>>>>>> 12724e28d0bf753b46ad1b94ca09e93e652b95af
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

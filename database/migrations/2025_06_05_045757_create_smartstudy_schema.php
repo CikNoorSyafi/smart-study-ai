@@ -29,17 +29,22 @@ return new class extends Migration
             DB::table('users')
                 ->where('id', $user->id)
                 ->update([
-                    'user_id' => DB::raw('UUID()'),
+                    'user_id' => \Illuminate\Support\Str::uuid()->toString(),
                     'username' => 'user_' . $user->id . '_' . time()
                 ]);
         }
 
-        // Add constraints if not already present
-        if (!Schema::hasColumn('users', 'user_id') || DB::select("SHOW INDEX FROM users WHERE Key_name = 'users_user_id_unique'") == []) {
-            Schema::table('users', function (Blueprint $table) {
-                $table->uuid('user_id')->nullable(false)->unique()->change();
-                $table->string('username')->nullable(false)->unique()->change();
-            });
+        // Make user_id and username non-nullable and unique if not already
+        if (Schema::hasColumn('users', 'user_id')) {
+            // For SQLite, we need to check if the unique constraint already exists differently
+            try {
+                Schema::table('users', function (Blueprint $table) {
+                    $table->uuid('user_id')->nullable(false)->unique()->change();
+                    $table->string('username')->nullable(false)->unique()->change();
+                });
+            } catch (\Exception $e) {
+                // Constraint might already exist, continue
+            }
         }
 
         // 2. Create Subjects table
@@ -47,7 +52,7 @@ return new class extends Migration
             $table->uuid('subject_id')->primary();
             $table->string('name')->unique();
             $table->text('description')->nullable();
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 
             $table->index('name');
         });
@@ -58,8 +63,7 @@ return new class extends Migration
             $table->uuid('user_id');
             $table->string('title');
             $table->text('content');
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamps();
             $table->string('status', 50)->default('draft');
 
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
@@ -77,8 +81,7 @@ return new class extends Migration
             $table->text('question_text');
             $table->string('generated_by', 50)->default('Manual');
             $table->string('difficulty', 50)->nullable();
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamps();
 
             $table->foreign('note_id')->references('note_id')->on('notes')->onDelete('cascade');
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
@@ -95,8 +98,7 @@ return new class extends Migration
             $table->uuid('question_id');
             $table->text('answer_text');
             $table->boolean('is_correct')->default(false);
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamps();
 
             $table->foreign('question_id')->references('question_id')->on('questions')->onDelete('cascade');
 
@@ -130,7 +132,7 @@ return new class extends Migration
             $table->text('bio')->nullable();
             $table->string('preferred_language', 10)->default('en');
             $table->string('timezone', 50)->nullable();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamps();
 
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
             $table->index('user_id');
@@ -161,7 +163,7 @@ return new class extends Migration
             $table->uuid('answer_id')->nullable();
             $table->integer('rating')->nullable();
             $table->text('comments')->nullable();
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('set null');
             $table->foreign('question_id')->references('question_id')->on('questions')->onDelete('cascade');

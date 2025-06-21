@@ -1,4 +1,4 @@
-# QuestionCraft Model Relationship Fixes
+# Smart Study Model Relationship Fixes
 
 ## ✅ **MODEL RELATIONSHIPS & DATABASE ISSUES COMPLETELY FIXED!**
 

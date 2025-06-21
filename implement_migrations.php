@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Script to implement all remaining migrations for QuestionCraft
+ * Script to implement all remaining migrations for Smart Study
  * This script will update the migration files with proper schema definitions
  */
 

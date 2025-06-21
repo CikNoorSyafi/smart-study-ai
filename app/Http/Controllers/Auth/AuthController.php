@@ -39,8 +39,10 @@ class AuthController extends Controller
             // Store additional user info in session for compatibility
             $request->session()->put('user', [
                 'id' => $user->id,
+                'user_id' => $user->user_id,
                 'name' => $user->name,
-                'email' => $user->email
+                'email' => $user->email,
+                'role' => $user->role
             ]);
 
             // Redirect based on user role
@@ -98,10 +100,13 @@ class AuthController extends Controller
         // Store user info in session for compatibility
         $request->session()->put('user', [
             'id' => $user->id,
+            'user_id' => $user->user_id,
             'name' => $user->name,
-            'email' => $user->email
+            'email' => $user->email,
+            'role' => $user->role
         ]);
 
+<<<<<<< HEAD
         // Redirect based on user role
         $redirectRoute = match($user->role) {
             'admin' => '/admin',
@@ -111,6 +116,9 @@ class AuthController extends Controller
         };
 
         return redirect($redirectRoute)->with('success', 'Account created successfully! Welcome to QuestionCraft, ' . $user->name . '.');
+=======
+        return redirect('/dashboard')->with('success', 'Account created successfully! Welcome to Smart Study, ' . $user->name . '.');
+>>>>>>> 12724e28d0bf753b46ad1b94ca09e93e652b95af
     }
 
     /**

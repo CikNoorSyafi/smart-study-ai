@@ -12,6 +12,8 @@ use App\Models\UserProfile;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Dompdf\Dompdf;
+
 
 class DashboardController extends Controller
 {
@@ -311,30 +313,274 @@ class DashboardController extends Controller
     public function exportData(Request $request)
     {
         $type = $request->get('type', 'all');
+        $format = $request->get('format', 'pdf');
 
         $data = [];
+        $title = '';
+        $filename = 'smart_study_export_' . date('Y-m-d_H-i-s');
 
         switch ($type) {
             case 'users':
-                $data = User::with('profile')->get();
+                $data = User::with('profile')->get()->map(function($user) {
+                    return [
+                        'id' => $user->user_id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'role' => ucfirst($user->role),
+                        'status' => $user->is_active ? 'Active' : 'Inactive',
+                        'created_at' => $user->created_at->format('M d, Y'),
+                        'profile' => $user->profile ? [
+                            'first_name' => $user->profile->first_name,
+                            'last_name' => $user->profile->last_name,
+                            'phone' => $user->profile->phone,
+                            'date_of_birth' => $user->profile->date_of_birth ? $user->profile->date_of_birth->format('M d, Y') : 'N/A',
+                        ] : null
+                    ];
+                });
+                $title = 'Users Report';
+                $filename .= '_users';
                 break;
             case 'notes':
-                $data = Note::with('user', 'subjects')->get();
+                $data = Note::with('user', 'subjects')->get()->map(function($note) {
+                    return [
+                        'id' => substr($note->note_id, 0, 8) . '...',
+                        'title' => $note->title,
+                        'content' => substr($note->content, 0, 100) . (strlen($note->content) > 100 ? '...' : ''),
+                        'status' => ucfirst($note->status),
+                        'author' => $note->user->name ?? 'Unknown',
+                        'subjects' => $note->subjects->pluck('name')->join(', ') ?: 'No subjects',
+                        'created_at' => $note->created_at->format('M d, Y'),
+                        'updated_at' => $note->updated_at->format('M d, Y'),
+                    ];
+                });
+                $title = 'Notes Report';
+                $filename .= '_notes';
                 break;
             case 'questions':
-                $data = Question::with('note', 'answers')->get();
+                $data = Question::with('note', 'answers')->get()->map(function($question) {
+                    return [
+                        'id' => substr($question->question_id, 0, 8) . '...',
+                        'question_text' => substr($question->question_text, 0, 80) . (strlen($question->question_text) > 80 ? '...' : ''),
+                        'question_type' => ucfirst($question->question_type ?? 'Multiple Choice'),
+                        'difficulty' => ucfirst($question->difficulty ?? 'Medium'),
+                        'generated_by' => $question->generated_by ?? 'System',
+                        'note_title' => $question->note->title ?? 'Unknown',
+                        'answers_count' => $question->answers->count(),
+                        'correct_answers' => $question->answers->where('is_correct', true)->count(),
+                        'created_at' => $question->created_at->format('M d, Y'),
+                    ];
+                });
+                $title = 'Questions Report';
+                $filename .= '_questions';
+                break;
+            case 'subjects':
+                $data = Subject::withCount(['notes', 'users'])->get()->map(function($subject) {
+                    return [
+                        'id' => substr($subject->subject_id, 0, 8) . '...',
+                        'name' => $subject->name,
+                        'description' => substr($subject->description ?? '', 0, 100) . (strlen($subject->description ?? '') > 100 ? '...' : ''),
+                        'notes_count' => $subject->notes_count,
+                        'users_count' => $subject->users_count,
+                        'created_at' => $subject->created_at->format('M d, Y'),
+                    ];
+                });
+                $title = 'Subjects Report';
+                $filename .= '_subjects';
+                break;
+            case 'feedback':
+                $data = Feedback::with('user')->get()->map(function($feedback) {
+                    return [
+                        'id' => substr($feedback->feedback_id, 0, 8) . '...',
+                        'user_name' => $feedback->user->name ?? 'Anonymous',
+                        'rating' => $feedback->rating . '/5 ⭐',
+                        'comment' => substr($feedback->comment ?? '', 0, 100) . (strlen($feedback->comment ?? '') > 100 ? '...' : ''),
+                        'created_at' => $feedback->created_at->format('M d, Y'),
+                    ];
+                });
+                $title = 'Feedback Report';
+                $filename .= '_feedback';
                 break;
             default:
+                // Complete export with summary statistics
                 $data = [
-                    'users' => User::with('profile')->get(),
-                    'subjects' => Subject::all(),
-                    'notes' => Note::with('subjects')->get(),
-                    'questions' => Question::with('answers')->get(),
-                    'feedback' => Feedback::all(),
+                    'export_info' => [
+                        'exported_at' => now()->format('M d, Y H:i:s'),
+                        'exported_by' => auth()->user()->name ?? 'System',
+                        'total_users' => User::count(),
+                        'total_subjects' => Subject::count(),
+                        'total_notes' => Note::count(),
+                        'total_questions' => Question::count(),
+                        'total_feedback' => Feedback::count(),
+                    ],
+                    'users' => User::with('profile')->take(10)->get()->map(function($user) {
+                        return [
+                            'name' => $user->name,
+                            'email' => $user->email,
+                            'role' => ucfirst($user->role),
+                            'status' => $user->is_active ? 'Active' : 'Inactive',
+                            'created_at' => $user->created_at->format('M d, Y'),
+                        ];
+                    }),
+                    'subjects' => Subject::withCount('notes')->take(10)->get()->map(function($subject) {
+                        return [
+                            'name' => $subject->name,
+                            'notes_count' => $subject->notes_count,
+                            'created_at' => $subject->created_at->format('M d, Y'),
+                        ];
+                    }),
+                    'notes' => Note::with('user')->take(10)->get()->map(function($note) {
+                        return [
+                            'title' => $note->title,
+                            'status' => ucfirst($note->status),
+                            'author' => $note->user->name ?? 'Unknown',
+                            'created_at' => $note->created_at->format('M d, Y'),
+                        ];
+                    }),
+                    'questions' => Question::with('answers')->take(10)->get()->map(function($question) {
+                        return [
+                            'question_text' => substr($question->question_text, 0, 60) . '...',
+                            'difficulty' => ucfirst($question->difficulty ?? 'Medium'),
+                            'answers_count' => $question->answers->count(),
+                            'created_at' => $question->created_at->format('M d, Y'),
+                        ];
+                    }),
+                    'feedback' => Feedback::with('user')->take(10)->get()->map(function($feedback) {
+                        return [
+                            'user_name' => $feedback->user->name ?? 'Anonymous',
+                            'rating' => $feedback->rating . '/5 ⭐',
+                            'created_at' => $feedback->created_at->format('M d, Y'),
+                        ];
+                    }),
                 ];
+                $title = 'Complete System Report';
+                $filename .= '_complete';
         }
 
-        return response()->json($data);
+        // Return appropriate format
+        switch ($format) {
+            case 'csv':
+                return $this->exportAsCSV($data, $filename);
+            case 'pdf':
+            default:
+                return $this->exportAsPDF($data, $title, $filename);
+        }
+    }
+
+    /**
+     * Export data as PDF file
+     */
+    private function exportAsPDF($data, $title, $filename)
+    {
+        // Prepare data for PDF view
+        $exportData = [
+            'title' => $title,
+            'data' => $data,
+            'exported_at' => now()->format('M d, Y H:i:s'),
+            'exported_by' => auth()->user()->name ?? 'System',
+        ];
+
+        // Render the view to HTML
+        $html = view('admin.exports.pdf-template', $exportData)->render();
+
+        // Create DomPDF instance with default settings
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Return PDF as download
+        return response($dompdf->output())
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '.pdf"');
+    }
+
+    /**
+     * Export data as CSV file
+     */
+    private function exportAsCSV($data, $filename)
+    {
+        // Handle different data structures
+        if (is_array($data) && isset($data['users'])) {
+            // Complete export - flatten to single CSV with all data
+            $csvData = $this->flattenCompleteDataForCSV($data);
+        } else {
+            // Single table export
+            $csvData = $this->convertToCSV($data);
+        }
+
+        return response($csvData)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '.csv"')
+            ->header('Content-Length', strlen($csvData));
+    }
+
+    /**
+     * Convert collection to CSV format
+     */
+    private function convertToCSV($data)
+    {
+        if (empty($data)) {
+            return "No data available\n";
+        }
+
+        $csv = '';
+        $headers = array_keys($data->first());
+        $csv .= implode(',', $headers) . "\n";
+
+        foreach ($data as $row) {
+            $csvRow = [];
+            foreach ($headers as $header) {
+                $value = $row[$header] ?? '';
+                // Escape quotes and wrap in quotes if contains comma
+                if (is_string($value) && (strpos($value, ',') !== false || strpos($value, '"') !== false)) {
+                    $value = '"' . str_replace('"', '""', $value) . '"';
+                }
+                $csvRow[] = $value;
+            }
+            $csv .= implode(',', $csvRow) . "\n";
+        }
+
+        return $csv;
+    }
+
+    /**
+     * Flatten complete data export for CSV
+     */
+    private function flattenCompleteDataForCSV($data)
+    {
+        $csv = "Smart Study Platform - Complete Data Export\n";
+        $csv .= "Exported at: " . ($data['export_info']['exported_at'] ?? now()) . "\n";
+        $csv .= "Total Records: " . ($data['export_info']['total_records'] ?? 0) . "\n\n";
+
+        foreach ($data as $section => $items) {
+            if ($section === 'export_info') continue;
+
+            $csv .= strtoupper($section) . "\n";
+            $csv .= str_repeat('=', 50) . "\n";
+
+            if (!empty($items)) {
+                $headers = array_keys($items->first());
+                $csv .= implode(',', $headers) . "\n";
+
+                foreach ($items as $item) {
+                    $csvRow = [];
+                    foreach ($headers as $header) {
+                        $value = $item[$header] ?? '';
+                        if (is_string($value) && (strpos($value, ',') !== false || strpos($value, '"') !== false)) {
+                            $value = '"' . str_replace('"', '""', $value) . '"';
+                        }
+                        $csvRow[] = $value;
+                    }
+                    $csv .= implode(',', $csvRow) . "\n";
+                }
+            } else {
+                $csv .= "No data available\n";
+            }
+
+            $csv .= "\n";
+        }
+
+        return $csv;
     }
 
     /**

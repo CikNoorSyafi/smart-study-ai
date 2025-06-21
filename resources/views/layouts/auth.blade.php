@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>@yield('title', 'QuestionCraft - Transform Learning into Questions')</title>
+        <title>@yield('title', 'Smart Study - Transform Learning into Questions')</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -30,7 +30,7 @@
                 <div class="flex justify-between items-center py-4">
                     <!-- Logo -->
                     <div class="flex items-center">
-                        <a href="{{ url('/') }}" class="text-2xl font-bold text-gray-900">QuestionCraft</a>
+                        <a href="{{ url('/') }}" class="text-2xl font-bold text-gray-900">Smart Study</a>
                     </div>
                     
                     <!-- Back to Home -->

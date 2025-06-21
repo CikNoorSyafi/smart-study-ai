@@ -15,11 +15,17 @@
                             </svg>
                         </a>
                         <div>
-                            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">My Questions</h1>
-                            <p class="mt-1 text-slate-600">Manage and review your generated question sets</p>
+                            @if(session('user.role') === 'student')
+                                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Practice Questions</h1>
+                                <p class="mt-1 text-slate-600">Practice with questions created by your teachers</p>
+                            @else
+                                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">My Questions</h1>
+                                <p class="mt-1 text-slate-600">Manage and review your generated question sets</p>
+                            @endif
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                        @if(session('user.role') !== 'student')
                         <button class="inline-flex items-center justify-center px-4 py-2.5 text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 border border-slate-300 hover:border-slate-400 font-medium shadow-sm hover:shadow-md">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -32,6 +38,15 @@
                             </svg>
                             Create New Questions
                         </button>
+                        @else
+                        <!-- Student View: Show practice/study options instead -->
+                        <a href="{{ route('ai-chat.index') }}" class="inline-flex items-center justify-center px-6 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium transform hover:scale-[1.02] active:scale-[0.98]">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            Get AI Study Help
+                        </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -307,14 +322,25 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-medium text-slate-900 mb-2">No questions yet</h3>
-                    <p class="text-slate-500 mb-6">Start creating questions from your learning materials.</p>
-                    <button class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        Create Your First Questions
-                    </button>
+                    @if(session('user.role') === 'student')
+                        <h3 class="text-lg font-medium text-slate-900 mb-2">No practice questions available</h3>
+                        <p class="text-slate-500 mb-6">Questions will appear here when your teachers create them for you to practice.</p>
+                        <a href="{{ route('ai-chat.index') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            Get AI Study Help Instead
+                        </a>
+                    @else
+                        <h3 class="text-lg font-medium text-slate-900 mb-2">No questions yet</h3>
+                        <p class="text-slate-500 mb-6">Start creating questions from your learning materials.</p>
+                        <button class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md font-medium">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Create Your First Questions
+                        </button>
+                    @endif
                 </div>
             @endif
         </div>

@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Note;
 use App\Models\User;
 use App\Models\Subject;
+use App\Models\Question;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Services\SimpleQuestionGenerator;
 
 class NoteController extends Controller
 {
@@ -91,7 +93,7 @@ class NoteController extends Controller
             $note->subjects()->attach($validated['subjects']);
         }
 
-        return redirect()->route('admin.notes.index')
+        return redirect()->route('admin.notes-crud.index')
                         ->with('success', 'Note created successfully.');
     }
 
@@ -152,7 +154,7 @@ class NoteController extends Controller
             $note->subjects()->detach();
         }
 
-        return redirect()->route('admin.notes.index')
+        return redirect()->route('admin.notes-crud.index')
                         ->with('success', 'Note updated successfully.');
     }
 
@@ -163,8 +165,130 @@ class NoteController extends Controller
     {
         $note->delete();
 
-        return redirect()->route('admin.notes.index')
+        return redirect()->route('admin.notes-crud.index')
                         ->with('success', 'Note deleted successfully.');
+    }
+
+    /**
+     * Generate intelligent questions from note content
+     */
+    public function generateQuestions(Request $request, Note $note)
+    {
+        $request->validate([
+            'count' => 'nullable|integer|min:1|max:10',
+            'difficulty' => 'nullable|in:easy,medium,hard'
+        ]);
+
+        $count = $request->get('count', 5);
+        $difficulty = $request->get('difficulty', 'medium');
+
+        try {
+            $generator = new SimpleQuestionGenerator();
+            $questions = $generator->generateFromNote($note, $count, $difficulty);
+
+            if (empty($questions)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to generate questions from this note content. Please ensure the note has sufficient content.'
+                ], 400);
+            }
+
+            $questionData = collect($questions)->map(function($question) {
+                return [
+                    'id' => $question->question_id,
+                    'text' => $question->question_text,
+                    'type' => $question->question_type,
+                    'difficulty' => $question->difficulty,
+                    'explanation' => $question->explanation,
+                    'answers' => $question->answers->map(function($answer) {
+                        return [
+                            'id' => $answer->answer_id,
+                            'text' => $answer->answer_text,
+                            'is_correct' => $answer->is_correct,
+                            'explanation' => $answer->explanation
+                        ];
+                    }),
+                    'status' => $question->status
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => count($questions) . ' questions generated successfully! Please review and approve them.',
+                'questions' => $questionData,
+                'requires_verification' => true
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate questions. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Approve generated questions
+     */
+    public function approveQuestions(Request $request)
+    {
+        $request->validate([
+            'question_ids' => 'required|array',
+            'question_ids.*' => 'exists:questions,question_id'
+        ]);
+
+        $approvedCount = 0;
+        foreach ($request->question_ids as $questionId) {
+            $question = Question::where('question_id', $questionId)->first();
+            if ($question && $question->status === 'pending') {
+                $question->update([
+                    'status' => 'approved',
+                    'approved_at' => now(),
+                    'approved_by' => auth()->id()
+                ]);
+                $approvedCount++;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$approvedCount} questions approved successfully!"
+        ]);
+    }
+
+    /**
+     * Reject generated questions
+     */
+    public function rejectQuestions(Request $request)
+    {
+        $request->validate([
+            'question_ids' => 'required|array',
+            'question_ids.*' => 'exists:questions,question_id'
+        ]);
+
+        try {
+            $rejectedCount = 0;
+            foreach ($request->question_ids as $questionId) {
+                $question = Question::where('question_id', $questionId)->first();
+
+                if ($question && $question->status === 'pending') {
+                    $question->answers()->delete();
+                    $question->delete();
+                    $rejectedCount++;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$rejectedCount} questions rejected and removed!"
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reject questions. Please try again.'
+            ], 500);
+        }
     }
 
     /**
@@ -184,4 +308,6 @@ class NoteController extends Controller
         return redirect()->back()
                         ->with('success', 'Notes status updated successfully.');
     }
+
+
 }

@@ -81,16 +81,21 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900">All Questions</h3>
                     <div class="flex items-center space-x-3">
-                        <div class="relative">
-                            <input type="text" placeholder="Search questions..." 
-                                   class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                        </div>
-                        <select class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option>All Status</option>
-                            <option>Answered</option>
-                            <option>Pending</option>
-                        </select>
+                        <form method="GET" action="{{ route('admin.questions.index') }}" class="flex items-center space-x-3">
+                            <div class="relative">
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search questions..."
+                                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                            <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
+                                <option value="approved" {{ $status === 'approved' ? 'selected' : '' }}>Approved Only</option>
+                                <option value="pending" {{ $status === 'pending' ? 'selected' : '' }}>Pending Review</option>
+                                <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All Status</option>
+                            </select>
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-search mr-2"></i>Search
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -109,12 +114,12 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse(\App\Models\Question::with(['user', 'note', 'answers'])->latest()->take(10)->get() as $question)
+                        @forelse($questions as $question)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4">
                                 <div class="max-w-xs">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ $question->question_text ?? 'Question #' . $question->id }}</p>
-                                    <p class="text-sm text-gray-500">ID: {{ $question->id }}</p>
+                                    <p class="text-sm font-medium text-gray-900 truncate">{{ $question->question_text ?? 'Question #' . $question->question_id }}</p>
+                                    <p class="text-sm text-gray-500">{{ ucfirst($question->difficulty ?? 'Unknown') }} • {{ ucfirst($question->generated_by ?? 'Manual') }}</p>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -138,13 +143,17 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if($question->answers->count() > 0)
+                                @if($question->status === 'approved')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <i class="fas fa-check mr-1"></i>Answered
+                                        <i class="fas fa-check mr-1"></i>Approved
+                                    </span>
+                                @elseif($question->status === 'pending')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-clock mr-1"></i>Pending Review
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                        <i class="fas fa-clock mr-1"></i>Pending
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        <i class="fas fa-question mr-1"></i>{{ ucfirst($question->status ?? 'Unknown') }}
                                     </span>
                                 @endif
                             </td>
@@ -187,22 +196,19 @@
                 </table>
             </div>
 
-            <!-- Pagination would go here -->
+            <!-- Pagination -->
+            @if($questions->hasPages())
             <div class="px-6 py-4 border-t border-gray-200">
                 <div class="flex items-center justify-between">
                     <p class="text-sm text-gray-700">
-                        Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">{{ \App\Models\Question::count() }}</span> results
+                        Showing <span class="font-medium">{{ $questions->firstItem() }}</span> to <span class="font-medium">{{ $questions->lastItem() }}</span> of <span class="font-medium">{{ $questions->total() }}</span> results
                     </p>
                     <div class="flex items-center space-x-2">
-                        <button class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50" disabled>
-                            Previous
-                        </button>
-                        <button class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50" disabled>
-                            Next
-                        </button>
+                        {{ $questions->appends(request()->query())->links() }}
                     </div>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </div>
